@@ -1,0 +1,4 @@
+.env
+um_blobs/
+secrets/
+*.apk

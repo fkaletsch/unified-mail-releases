@@ -1,0 +1,64 @@
+# Unified Mail — pull public images from GHCR (no source build).
+# Copy .env.example → .env, create um_blobs, then: docker compose up -d
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: um
+      POSTGRES_PASSWORD: um
+      POSTGRES_DB: unifiedmail
+    volumes:
+      - um_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U um -d unifiedmail"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    image: ghcr.io/fkaletsch/unifiedmail-backend:latest
+    entrypoint: ["/api"]
+    env_file: [.env]
+    environment:
+      UM_BLOB_ROOT: /data/blobs
+    volumes:
+      - ./um_blobs:/data/blobs
+      # Optional FCM: ./secrets/firebase-sa.json:/run/secrets/firebase-sa.json:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    image: ghcr.io/fkaletsch/unifiedmail-backend:latest
+    entrypoint: ["/worker"]
+    env_file: [.env]
+    environment:
+      UM_BLOB_ROOT: /data/blobs
+    volumes:
+      - ./um_blobs:/data/blobs
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+
+  web:
+    image: ghcr.io/fkaletsch/unifiedmail-web:latest
+    depends_on: [api]
+    ports:
+      - "8088:80"
+
+volumes:
+  um_pg:
