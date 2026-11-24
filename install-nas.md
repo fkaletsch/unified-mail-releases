@@ -44,19 +44,23 @@ mkdir -p um_blobs
 chmod a+rwX um_blobs
 ```
 
-In `.env` mindestens setzen:
+In `.env` **vor dem ersten Start** mindestens setzen:
 
 | Variable | Beispiel / Hinweis |
 |----------|--------------------|
+| `POSTGRES_PASSWORD` | starkes Passwort — **nicht** den Platzhalter lassen |
+| `UM_DATABASE_URL` | muss dasselbe Passwort (und User/DB) enthalten, z. B. `postgres://um:GEHEIM@db:5432/unifiedmail?sslmode=disable` |
 | `UM_MASTER_KEY` | `openssl rand -hex 16` (auf PC oder NAS) — **sichern**, Verlust = Provider neu einbinden |
 | `UM_PUBLIC_URL` | öffentliche URL, z. B. `https://mail.example.com` (ohne Slash am Ende) |
 | `UM_COOKIE_SECURE` | hinter HTTPS: `true` |
 | `UM_WEBAUTHN_RPID` | Hostname, z. B. `mail.example.com` |
 | `UM_WEBAUTHN_ORIGIN` | volle Origin, z. B. `https://mail.example.com` |
 
+**Postgres-Passwort:** Compose liest `POSTGRES_*` aus `.env`. Das gilt nur beim **ersten** Anlegen des Volumes `um_pg`. Später nur in `.env` zu ändern reicht nicht — dann müsstest du das Volume löschen (Datenverlust) oder das Passwort in Postgres manuell anpassen. Deshalb: vor `docker compose up` setzen und `UM_DATABASE_URL` synchron halten.
+
 Lokal nur zum Testen: `UM_PUBLIC_URL=http://NAS-IP:8088` und `UM_COOKIE_SECURE=false` reichen oft.
 
-`.env` und `um_blobs/` **nicht** in Backups überschreiben und nicht öffentlich teilen.
+`.env` und `um_blobs/` **nicht** öffentlich teilen; `.env` gehört ins Backup (wegen `UM_MASTER_KEY` und DB-Passwort).
 
 ---
 

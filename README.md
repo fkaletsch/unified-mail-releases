@@ -10,7 +10,8 @@ This repository only ships **release artifacts**. Application source stays priva
 ## Self-host (Docker)
 
 ```bash
-cp .env.example .env   # set secrets, see comments
+cp .env.example .env
+# Before first start: set POSTGRES_PASSWORD + matching UM_DATABASE_URL, and UM_MASTER_KEY
 mkdir -p um_blobs && chmod a+rwX um_blobs
 docker compose pull
 docker compose up -d
