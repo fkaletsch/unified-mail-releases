@@ -16,7 +16,9 @@ docker compose pull
 docker compose up -d
 ```
 
-See [`.env.example`](.env.example) and `docker-compose.yml`. Full ops notes live with the operator; this repo is the public download surface.
+See [`.env.example`](.env.example) and `docker-compose.yml`.
+
+**NAS / Synology:** Schritt-für-Schritt inkl. Container Manager und Reverse-Proxy → **[install-nas.md](install-nas.md)**.
 
 ## Android
 
